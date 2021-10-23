@@ -1,0 +1,12 @@
+<html>
+<body>
+<h1>Всё готово!</h1>
+{% if files %}
+    {% for file_url in files %}
+        <div>
+            <a href="storage?filename={{ file_url }}">Скачать {{ file_url }}</a>
+        </div>
+    {% endfor %}
+{% endif %}
+</body>
+</html>
