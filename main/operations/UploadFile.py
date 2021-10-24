@@ -5,6 +5,8 @@ import pdf2image
 import json
 import random
 
+from main.operations.FileUtilities import FileUtilities
+
 
 class UploadFile:
     @staticmethod
@@ -23,7 +25,8 @@ class UploadFile:
         current_state.append({
             "actual_filename": filename,
             "user_filename": file.name,
-            "image": image
+            "image": image,
+            "pages_number": UploadFile.count_pages(pdf_file)
         })
         return current_state
 
@@ -31,11 +34,13 @@ class UploadFile:
     def convert_page_to_image(page):
         pdf_writer = PyPDF2.PdfFileWriter()
         pdf_writer.addPage(page)
-        with open("storage/temp.pdf", "wb") as output:
-            pdf_writer.write(output)
-        image = pdf2image.convert_from_path("storage/temp.pdf")
-        filename = 'cover_'
-        filename += "".join(random.choices("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM", k=6))
-        filename += ".jpg"
+        pdf_tmp_filename = FileUtilities.generate_tmp_name("pdf_first_page_", ".pdf")
+        FileUtilities.write_pdf(pdf_tmp_filename, pdf_writer)
+        image = pdf2image.convert_from_path("storage/"+pdf_tmp_filename)
+        filename = FileUtilities.generate_tmp_name('cover_', ".jpg")
         image[0].save("storage/"+filename, 'JPEG')
         return filename
+
+    @staticmethod
+    def count_pages(pdf_reader):
+        return pdf_reader.numPages

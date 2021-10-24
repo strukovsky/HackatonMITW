@@ -1,7 +1,9 @@
 import PyPDF2
 
+from main.operations.FileUtilities import FileUtilities
 
-class SplitFile:
+
+class SplitFiles:
     def __init__(self):
         self.filenames = []
 
@@ -21,12 +23,10 @@ class SplitFile:
     def write_one_page(self, page, page_num, filename):
         pdf_writer = PyPDF2.PdfFileWriter()
         pdf_writer.addPage(page)
-        if filename[len(filename)-4:] == ".pdf":
-            filename = filename[:len(filename)-4]
+        filename = FileUtilities.remove_extension(filename)
         resulting_filename = filename
         resulting_filename += " страница "
         resulting_filename += str(page_num)
         resulting_filename += ".pdf"
         self.filenames.append(resulting_filename)
-        with open("storage/" + resulting_filename, "wb") as output:
-            pdf_writer.write(output)
+        FileUtilities.write_pdf(resulting_filename, pdf_writer)

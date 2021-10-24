@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Список задач с drag & drop</title>
+</head>
+<body>
+<div class="container">
+    <section class="tasks">
+        <h1 class="tasks__title">To do list</h1>
+
+        <form method="post" action="result.html">
+            {% csrf_token %}
+            <ul class="PageList">
+                {% for page in pages %}
+                    <div class="PageItem">
+                        <input type="hidden" name="{{ page.number }}">
+                        <img src="storage?filename={{ page.image }}" alt="{{ page.number }}-я страница"/>
+                    </div>
+                {% endfor %}
+            </ul>
+        </form>
+
+    </section>
+</div>
+
+<script>
+    const tasksListElement = document.querySelector(`.PageList`);
+    const taskElements = tasksListElement.querySelectorAll(`.PageItem`);
+
+    for (const task of taskElements) {
+        task.draggable = true;
+    }
+
+    tasksListElement.addEventListener(`dragstart`, (evt) => {
+        evt.target.classList.add(`selected`);
+    });
+
+    tasksListElement.addEventListener(`dragend`, (evt) => {
+        evt.target.classList.remove(`selected`);
+    });
+
+    const getNextElement = (cursorPosition, currentElement) => {
+        const currentElementCoord = currentElement.getBoundingClientRect();
+        const currentElementCenter = currentElementCoord.y + currentElementCoord.height / 2;
+
+        const nextElement = (cursorPosition < currentElementCenter) ?
+            currentElement :
+            currentElement.nextElementSibling;
+
+        return nextElement;
+    };
+
+    tasksListElement.addEventListener(`dragover`, (evt) => {
+        evt.preventDefault();
+
+        const activeElement = tasksListElement.querySelector(`.selected`);
+        const currentElement = evt.target;
+        const isMoveable = activeElement !== currentElement &&
+            currentElement.classList.contains(`PageItem`);
+
+        if (!isMoveable) {
+            return;
+        }
+
+        const nextElement = getNextElement(evt.clientY, currentElement);
+
+        if (
+            nextElement &&
+            activeElement === nextElement.previousElementSibling ||
+            activeElement === nextElement
+        ) {
+            return;
+        }
+
+        tasksListElement.insertBefore(activeElement, nextElement);
+    });
+
+</script>
+</body>
+</html>
